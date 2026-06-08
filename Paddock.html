@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paddock - Cloud23 Innovations</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f3;
+    --bg-tertiary: #eeede9;
+    --text: #1a1a18;
+    --text-secondary: #6b6b67;
+    --text-tertiary: #9b9b97;
+    --border: rgba(0,0,0,0.12);
+    --border-hover: rgba(0,0,0,0.25);
+    --border-strong: rgba(0,0,0,0.35);
+    --radius-md: 8px;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --blue-text: #0C447C;
+    --green: #1D9E75;
+    --green-light: #EAF3DE;
+    --green-text: #27500A;
+    --amber: #EF9F27;
+    --amber-light: #FAEEDA;
+    --amber-text: #633806;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-text: #791F1F;
+    --gray-light: #F1EFE8;
+    --gray-text: #444441;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg-secondary: #252523;
+      --bg-tertiary: #2e2e2c;
+      --text: #f0efe9;
+      --text-secondary: #a0a09a;
+      --text-tertiary: #6b6b65;
+      --border: rgba(255,255,255,0.10);
+      --border-hover: rgba(255,255,255,0.22);
+      --border-strong: rgba(255,255,255,0.32);
+      --blue: #378ADD;
+      --blue-light: #042C53;
+      --blue-text: #B5D4F4;
+      --green: #5DCAA5;
+      --green-light: #173404;
+      --green-text: #C0DD97;
+      --amber: #EF9F27;
+      --amber-light: #412402;
+      --amber-text: #FAC775;
+      --red: #F09595;
+      --red-light: #501313;
+      --red-text: #F7C1C1;
+      --gray-light: #2C2C2A;
+      --gray-text: #B4B2A9;
+    }
+  }
+
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-tertiary); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+  .app-header { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; gap: 12px; height: 52px; }
+  .app-logo { font-size: 15px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .app-logo i { color: var(--blue); font-size: 18px; }
+
+  .sync-status { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-tertiary); }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-tertiary); transition: background .3s; }
+  .sync-dot.synced { background: var(--green); }
+  .sync-dot.syncing { background: var(--amber); animation: pulse 1s infinite; }
+  .sync-dot.error { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .app-body { padding: 1.25rem 1.5rem; max-width: 1300px; margin: 0 auto; }
+
+  .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 10px 14px; }
+  .toolbar select, .toolbar input[type="text"] { font-size: 13px; padding: 6px 10px; height: 34px; border: 0.5px solid var(--border-hover); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text); outline: none; cursor: pointer; }
+  .toolbar select:focus, .toolbar input:focus { border-color: var(--blue); }
+
+  .btn { font-size: 13px; padding: 6px 12px; height: 34px; border: 0.5px solid var(--border-hover); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: background .15s; }
+  .btn:hover { background: var(--bg-tertiary); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.primary { background: var(--blue); color: var(--blue-light); border-color: var(--blue); }
+  .btn.primary:hover { opacity: .9; }
+  .btn.danger { color: var(--red); }
+
+  .separator { flex: 1; }
+  .views { display: flex; gap: 4px; }
+  .view-btn { padding: 6px 10px; height: 34px; border: 0.5px solid var(--border); border-radius: var(--radius-md); background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; }
+  .view-btn:hover { background: var(--bg-secondary); }
+  .view-btn.active { background: var(--bg-secondary); color: var(--text); border-color: var(--border-strong); }
+
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-bottom: 1rem; }
+  .stat { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; }
+  .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 500; }
+  .stat-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+  .kanban { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+  .kanban-col { background: var(--bg-secondary); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 10px; }
+  .col-header { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); padding: 0 2px 10px; display: flex; align-items: center; justify-content: space-between; }
+  .col-count { font-size: 11px; background: var(--bg); border: 0.5px solid var(--border); border-radius: 10px; padding: 1px 7px; color: var(--text-secondary); }
+  .col-body { display: flex; flex-direction: column; gap: 6px; min-height: 80px; }
+
+  .task-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+  .task-card:hover { border-color: var(--border-strong); box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .task-card.overdue { border-left: 2.5px solid var(--red); }
+  .task-card.due-soon { border-left: 2.5px solid var(--amber); }
+
+  .tc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 7px; }
+  .tc-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+  .prio { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .prio.high { background: var(--red); }
+  .prio.medium { background: var(--amber); }
+  .prio.low { background: var(--green); }
+
+  .tc-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+  .badge-client { background: var(--blue-light); color: var(--blue-text); }
+  .tc-date { font-size: 11px; color: var(--text-tertiary); margin-left: auto; }
+  .tc-date.overdue { color: var(--red-text); }
+  .tc-date.soon { color: var(--amber-text); }
+
+  .list-view { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .list-header { display: grid; grid-template-columns: 1fr 120px 90px 90px 90px 80px; gap: 8px; padding: 8px 14px; font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; border-bottom: 0.5px solid var(--border); background: var(--bg-secondary); }
+  .list-row { display: grid; grid-template-columns: 1fr 120px 90px 90px 90px 80px; gap: 8px; padding: 10px 14px; font-size: 13px; color: var(--text); border-bottom: 0.5px solid var(--border); cursor: pointer; align-items: center; transition: background .1s; }
+  .list-row:last-child { border-bottom: none; }
+  .list-row:hover { background: var(--bg-secondary); }
+
+  .status-pill { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; text-align: center; white-space: nowrap; display: inline-block; }
+  .s-todo { background: var(--gray-light); color: var(--gray-text); }
+  .s-inprogress { background: var(--blue-light); color: var(--blue-text); }
+  .s-review { background: var(--amber-light); color: var(--amber-text); }
+  .s-done { background: var(--green-light); color: var(--green-text); }
+
+  .cal-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 8px 14px; }
+  .cal-title { font-size: 15px; font-weight: 500; color: var(--text); flex: 1; text-align: center; }
+  .cal-btn { background: none; border: 0.5px solid var(--border-hover); border-radius: var(--radius-md); padding: 5px 10px; cursor: pointer; color: var(--text-secondary); font-size: 13px; display: flex; align-items: center; }
+  .cal-btn:hover { background: var(--bg-secondary); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 1px; background: var(--border); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .cal-day-name { background: var(--bg-secondary); text-align: center; font-size: 11px; color: var(--text-secondary); padding: 7px; text-transform: uppercase; letter-spacing: .05em; }
+  .cal-day { background: var(--bg); min-height: 88px; padding: 6px; }
+  .cal-day.other-month { background: var(--bg-secondary); }
+  .cal-day.today .cal-day-num { background: var(--blue); color: var(--blue-light); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+  .cal-day-num { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+  .cal-task-dot { font-size: 10px; padding: 1px 5px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: flex-start; justify-content: center; padding-top: 80px; z-index: 1000; }
+  .modal { background: var(--bg); border: 0.5px solid var(--border-hover); border-radius: var(--radius-lg); width: 480px; max-width: calc(100vw - 2rem); max-height: calc(100vh - 120px); overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.15); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: var(--bg); }
+  .modal-title { font-size: 15px; font-weight: 500; }
+  .close-btn { background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 18px; display: flex; align-items: center; padding: 2px; border-radius: 4px; }
+  .close-btn:hover { background: var(--bg-secondary); }
+  .modal-body { padding: 1.25rem; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 500; }
+  .field input, .field select, .field textarea { width: 100%; font-size: 13px; padding: 7px 10px; border: 0.5px solid var(--border-hover); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text); outline: none; transition: border-color .15s; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); }
+  .field textarea { resize: vertical; min-height: 72px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 1rem 1.25rem; border-top: 0.5px solid var(--border); }
+
+  .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; gap: 12px; color: var(--text-secondary); font-size: 13px; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); font-size: 13px; padding: 10px 16px; border-radius: var(--radius-md); z-index: 9999; opacity: 0; transition: opacity .25s; pointer-events: none; display: flex; align-items: center; gap: 8px; }
+  .toast.show { opacity: 1; }
+  .toast.error { background: var(--red); color: #fff; }
+
+  .empty-col { font-size: 12px; color: var(--text-tertiary); padding: 20px 0; text-align: center; }
+  .empty-state { text-align: center; padding: 40px; color: var(--text-tertiary); font-size: 13px; }
+
+  @media (max-width: 800px) {
+    .kanban { grid-template-columns: 1fr 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .list-header, .list-row { grid-template-columns: 1fr 80px 70px 80px; }
+    .list-header span:nth-child(2), .list-row span:nth-child(2),
+    .list-header span:last-child, .list-row span:last-child { display: none; }
+  }
+  @media (max-width: 520px) {
+    .kanban { grid-template-columns: 1fr; }
+    .app-body { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">
+    <i class="ti ti-layout-kanban" aria-hidden="true"></i>
+    Paddock - Cloud23 Innovations
+  </div>
+  <div class="sync-status">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Connecting…</span>
+  </div>
+</header>
+
+<div class="app-body">
+  <div class="toolbar">
+    <select id="filterClient"><option value="">All clients</option></select>
+    <select id="filterStatus">
+      <option value="">All statuses</option>
+      <option value="todo">To do</option>
+      <option value="inprogress">In progress</option>
+      <option value="review">Review</option>
+      <option value="done">Done</option>
+    </select>
+    <select id="filterType">
+      <option value="">All types</option>
+      <option value="Feature">Feature</option>
+      <option value="Bug">Bug</option>
+      <option value="Infra">Infra</option>
+      <option value="Design">Design</option>
+      <option value="Research">Research</option>
+    </select>
+    <input type="text" id="search" placeholder="Search tasks…" style="min-width:160px">
+    <div class="separator"></div>
+    <div class="views">
+      <button class="view-btn active" onclick="setView('kanban')" id="vb-kanban"><i class="ti ti-layout-kanban" aria-hidden="true"></i> Board</button>
+      <button class="view-btn" onclick="setView('list')" id="vb-list"><i class="ti ti-list" aria-hidden="true"></i> List</button>
+      <button class="view-btn" onclick="setView('calendar')" id="vb-cal"><i class="ti ti-calendar" aria-hidden="true"></i> Calendar</button>
+    </div>
+    <button class="btn" onclick="loadTasks()" title="Refresh"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+    <button class="btn primary" onclick="openAdd()"><i class="ti ti-plus" aria-hidden="true"></i> Add task</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div id="main-view"><div class="loading-screen"><div class="spinner"></div><span>Loading tasks…</span></div></div>
+</div>
+
+<div id="modal-container"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://ntogpoahgokiegdqrrfa.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50b2dwb2FoZ29raWVnZHFycmZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MDg0NTYsImV4cCI6MjA5NjQ4NDQ1Nn0.ty-GfOPzgqa_5L0l5G66UPMBt2rPIjp5n50I4OYb93E';
+const API = `${SUPABASE_URL}/rest/v1/tasks`;
+const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+const CLIENTS = ['Acme Corp','NovaTech','Bright Health','Stellar IO','CodeBase Ltd'];
+const TYPES = ['Feature','Bug','Infra','Design','Research'];
+const STATUSES = ['todo','inprogress','review','done'];
+const STATUS_LABELS = {todo:'To do',inprogress:'In progress',review:'Review',done:'Done'};
+const TYPE_COLORS = {Feature:'#B5D4F4',Bug:'#F7C1C1',Infra:'#D3D1C7',Design:'#F5C4B3',Research:'#C0DD97'};
+const TYPE_TEXT = {Feature:'#0C447C',Bug:'#791F1F',Infra:'#444441',Design:'#712B13',Research:'#27500A'};
+
+let tasks = [];
+let currentView = 'kanban';
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let editingId = null;
+
+// ── Sync status indicator ──────────────────────────────────────────────────
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = label;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3000);
+}
+
+// ── Supabase API helpers ───────────────────────────────────────────────────
+function dbToTask(r) {
+  return {
+    id: r.id,
+    title: r.title,
+    desc: r.description || '',
+    client: r.client || '',
+    type: r.type || 'Feature',
+    status: r.status || 'todo',
+    priority: r.priority || 'medium',
+    due: r.due_date || '',
+  };
+}
+
+function taskToDb(t) {
+  return {
+    title: t.title,
+    description: t.desc || '',
+    client: t.client || '',
+    type: t.type || 'Feature',
+    status: t.status || 'todo',
+    priority: t.priority || 'medium',
+    due_date: t.due || null,
+  };
+}
+
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, { ...options, headers: { ...HEADERS, ...(options.headers || {}) } });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err || res.statusText);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function loadTasks() {
+  setSyncStatus('syncing', 'Loading…');
+  try {
+    const rows = await apiFetch(`${API}?order=created_at.asc`);
+    tasks = (rows || []).map(dbToTask);
+    setSyncStatus('synced', 'Live');
+    populateClientFilter();
+    render();
+  } catch(e) {
+    setSyncStatus('error', 'Connection error');
+    showToast('Failed to load tasks. Check your connection.', true);
+    document.getElementById('main-view').innerHTML = `<div class="empty-state"><i class="ti ti-wifi-off" style="font-size:32px;display:block;margin-bottom:8px"></i>Could not connect to database.<br><small style="color:var(--text-tertiary)">${escHtml(e.message)}</small></div>`;
+  }
+}
+
+async function createTask(task) {
+  setSyncStatus('syncing', 'Saving…');
+  const rows = await apiFetch(API, { method: 'POST', body: JSON.stringify(taskToDb(task)) });
+  const created = dbToTask(rows[0]);
+  tasks.push(created);
+  setSyncStatus('synced', 'Saved');
+  return created;
+}
+
+async function updateTask(id, task) {
+  setSyncStatus('syncing', 'Saving…');
+  await apiFetch(`${API}?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(taskToDb(task)) });
+  tasks = tasks.map(t => t.id === id ? { ...task, id } : t);
+  setSyncStatus('synced', 'Saved');
+}
+
+async function deleteTaskDb(id) {
+  setSyncStatus('syncing', 'Deleting…');
+  await apiFetch(`${API}?id=eq.${id}`, { method: 'DELETE' });
+  tasks = tasks.filter(t => t.id !== id);
+  setSyncStatus('synced', 'Saved');
+}
+
+// ── Filtering ──────────────────────────────────────────────────────────────
+function getFiltered() {
+  const c = document.getElementById('filterClient').value;
+  const s = document.getElementById('filterStatus').value;
+  const t = document.getElementById('filterType').value;
+  const q = document.getElementById('search').value.toLowerCase();
+  return tasks.filter(task =>
+    (!c || task.client === c) &&
+    (!s || task.status === s) &&
+    (!t || task.type === t) &&
+    (!q || task.title.toLowerCase().includes(q) || task.client.toLowerCase().includes(q))
+  );
+}
+
+function daysFromNow(d) { return Math.round((new Date(d) - new Date()) / 86400000); }
+function fmt(d) { if(!d) return ''; const p = d.split('-'); return `${p[2]}/${p[1]}/${p[0].slice(2)}`; }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;'); }
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderStats() {
+  const all = getFiltered();
+  const overdue = all.filter(t => t.status !== 'done' && t.due && daysFromNow(t.due) < 0).length;
+  const done = all.filter(t => t.status === 'done').length;
+  const inprog = all.filter(t => t.status === 'inprogress').length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">${all.length}</div><div class="stat-sub">tasks</div></div>
+    <div class="stat"><div class="stat-label">In progress</div><div class="stat-value" style="color:var(--blue)">${inprog}</div><div class="stat-sub">active</div></div>
+    <div class="stat"><div class="stat-label">Overdue</div><div class="stat-value" style="color:var(--red)">${overdue}</div><div class="stat-sub">need attention</div></div>
+    <div class="stat"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--green)">${done}</div><div class="stat-sub">done</div></div>
+  `;
+}
+
+function cardHtml(task) {
+  const d = daysFromNow(task.due);
+  const isOverdue = task.status !== 'done' && d < 0;
+  const isSoon = task.status !== 'done' && d >= 0 && d <= 2;
+  const dateStr = task.due ? fmt(task.due) : '';
+  const dateClass = isOverdue ? 'overdue' : isSoon ? 'soon' : '';
+  return `<div class="task-card${isOverdue ? ' overdue' : isSoon ? ' due-soon' : ''}" onclick="openDetail(${task.id})">
+    <div class="tc-top">
+      <div class="tc-title">${escHtml(task.title)}</div>
+      <div class="prio ${task.priority}" title="${task.priority} priority"></div>
+    </div>
+    <div class="tc-meta">
+      <span class="badge badge-client">${escHtml(task.client)}</span>
+      <span class="badge" style="background:${TYPE_COLORS[task.type]||'#ddd'};color:${TYPE_TEXT[task.type]||'#333'}">${task.type}</span>
+      ${dateStr ? `<span class="tc-date ${dateClass}">${isOverdue ? '⚠ ' : ''}${dateStr}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderKanban() {
+  const filtered = getFiltered();
+  const cols = STATUSES.map(s => {
+    const cards = filtered.filter(t => t.status === s);
+    return `<div class="kanban-col">
+      <div class="col-header">${STATUS_LABELS[s]}<span class="col-count">${cards.length}</span></div>
+      <div class="col-body">${cards.length ? cards.map(cardHtml).join('') : '<div class="empty-col">No tasks</div>'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('main-view').innerHTML = `<div class="kanban">${cols}</div>`;
+}
+
+function renderList() {
+  const filtered = getFiltered().sort((a, b) => a.due > b.due ? 1 : -1);
+  if (!filtered.length) {
+    document.getElementById('main-view').innerHTML = '<div class="list-view"><div class="empty-state">No tasks match the current filters.</div></div>';
+    return;
+  }
+  const rows = filtered.map(t => {
+    const d = daysFromNow(t.due);
+    const isOverdue = t.status !== 'done' && d < 0;
+    const isSoon = t.status !== 'done' && d >= 0 && d <= 2;
+    const prioColor = t.priority === 'high' ? 'var(--red)' : t.priority === 'medium' ? 'var(--amber)' : 'var(--green)';
+    return `<div class="list-row" onclick="openDetail(${t.id})">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${prioColor};flex-shrink:0;display:inline-block"></span>
+        ${escHtml(t.title)}
+      </div>
+      <span style="font-size:12px;color:var(--text-secondary)">${escHtml(t.client)}</span>
+      <span class="badge" style="background:${TYPE_COLORS[t.type]||'#ddd'};color:${TYPE_TEXT[t.type]||'#333'};display:inline-block">${t.type}</span>
+      <span class="status-pill s-${t.status}">${STATUS_LABELS[t.status]}</span>
+      <span style="font-size:12px;color:${isOverdue ? 'var(--red-text)' : isSoon ? 'var(--amber-text)' : 'var(--text-secondary)'}">${t.due ? fmt(t.due) : '—'}</span>
+      <span style="font-size:11px;color:var(--text-tertiary)">${t.priority}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('main-view').innerHTML = `<div class="list-view">
+    <div class="list-header"><span>Task</span><span>Client</span><span>Type</span><span>Status</span><span>Due</span><span>Priority</span></div>
+    ${rows}
+  </div>`;
+}
+
+function renderCalendar() {
+  const filtered = getFiltered();
+  const year = calYear, month = calMonth;
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const startDay = first.getDay();
+  const today = new Date();
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let days = '';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => { days += `<div class="cal-day-name">${d}</div>`; });
+  for (let i = 0; i < startDay; i++) {
+    const pd = new Date(year, month, -(startDay - 1 - i));
+    days += `<div class="cal-day other-month"><div class="cal-day-num" style="color:var(--text-tertiary)">${pd.getDate()}</div></div>`;
+  }
+  for (let d = 1; d <= last.getDate(); d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+    const dayTasks = filtered.filter(t => t.due === dateStr);
+    const dots = dayTasks.slice(0,3).map(t =>
+      `<div class="cal-task-dot" style="background:${TYPE_COLORS[t.type]||'#ddd'};color:${TYPE_TEXT[t.type]||'#333'}" onclick="event.stopPropagation();openDetail(${t.id})" title="${escAttr(t.title)}">${escHtml(t.title)}</div>`
+    ).join('');
+    const more = dayTasks.length > 3 ? `<div style="font-size:10px;color:var(--text-tertiary)">+${dayTasks.length-3} more</div>` : '';
+    days += `<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>${dots}${more}</div>`;
+  }
+  const remaining = (7 - ((startDay + last.getDate()) % 7)) % 7;
+  for (let i = 1; i <= remaining; i++) days += `<div class="cal-day other-month"><div class="cal-day-num" style="color:var(--text-tertiary)">${i}</div></div>`;
+  document.getElementById('main-view').innerHTML = `
+    <div class="cal-nav">
+      <button class="cal-btn" onclick="calNav(-1)"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+      <div class="cal-title">${monthNames[month]} ${year}</div>
+      <button class="cal-btn" onclick="calNav(1)"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+    </div>
+    <div class="cal-grid">${days}</div>
+  `;
+}
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function setView(v) {
+  currentView = v;
+  ['kanban','list','cal'].forEach(k => document.getElementById('vb-'+k).classList.remove('active'));
+  document.getElementById('vb-'+v).classList.add('active');
+  render();
+}
+
+function render() {
+  renderStats();
+  if (currentView === 'kanban') renderKanban();
+  else if (currentView === 'list') renderList();
+  else renderCalendar();
+}
+
+// ── Detail modal ───────────────────────────────────────────────────────────
+function openDetail(id) {
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  const d = daysFromNow(task.due);
+  const isOverdue = task.status !== 'done' && d < 0;
+  const prioColor = task.priority === 'high' ? 'var(--red)' : task.priority === 'medium' ? 'var(--amber)' : 'var(--green)';
+  const otherStatuses = STATUSES.filter(s => s !== task.status);
+  document.getElementById('modal-container').innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">${escHtml(task.title)}</span>
+        <button class="close-btn" onclick="closeModal()"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <span class="status-pill s-${task.status}">${STATUS_LABELS[task.status]}</span>
+          <span class="badge badge-client">${escHtml(task.client)}</span>
+          <span class="badge" style="background:${TYPE_COLORS[task.type]||'#ddd'};color:${TYPE_TEXT[task.type]||'#333'}">${task.type}</span>
+          <span style="font-size:12px;padding:2px 8px;border-radius:10px;background:var(--bg-secondary);color:${prioColor}">● ${task.priority}</span>
+        </div>
+        ${task.desc ? `<p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6">${escHtml(task.desc)}</p>` : ''}
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">
+          <i class="ti ti-calendar" aria-hidden="true"></i> Due: <span style="color:${isOverdue?'var(--red)':'var(--text)'}">${task.due?fmt(task.due):'—'}${isOverdue?' (overdue)':''}</span>
+        </div>
+        <div style="margin-bottom:8px;font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Move to</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${otherStatuses.map(s => `<button class="btn" onclick="changeStatus(${id},'${s}')">${STATUS_LABELS[s]}</button>`).join('')}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="openEdit(${id})"><i class="ti ti-edit" aria-hidden="true"></i> Edit</button>
+        <button class="btn danger" onclick="confirmDelete(${id})"><i class="ti ti-trash" aria-hidden="true"></i> Delete</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function changeStatus(id, status) {
+  closeModal();
+  try {
+    await updateTask(id, { ...tasks.find(t => t.id === id), status });
+    render();
+    showToast('Status updated');
+  } catch(e) {
+    showToast('Failed to update status', true);
+    setSyncStatus('error', 'Error');
+  }
+}
+
+function openAdd() { editingId = null; openForm({}); }
+function openEdit(id) { editingId = id; closeModal(); openForm(tasks.find(x => x.id === id) || {}); }
+
+function openForm(t) {
+  const allClients = [...new Set(tasks.map(x => x.client).filter(Boolean))].sort();
+  const clientSuggestions = allClients.map(c => `<option value="${escAttr(c)}">`).join('');
+  document.getElementById('modal-container').innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">${editingId ? 'Edit task' : 'New task'}</span>
+        <button class="close-btn" onclick="closeModal()"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="field"><label>Title *</label><input id="f-title" value="${escAttr(t.title||'')}" placeholder="Task title"></div>
+        <div class="field"><label>Description</label><textarea id="f-desc" placeholder="Optional details…">${escHtml(t.desc||'')}</textarea></div>
+        <datalist id="client-suggestions">${clientSuggestions}</datalist>
+        <div class="field-row">
+          <div class="field"><label>Client</label><input id="f-client" value="${escAttr(t.client||'')}" placeholder="Client name" list="client-suggestions" autocomplete="off"></div>
+          <div class="field"><label>Type</label><select id="f-type">${TYPES.map(tp=>`<option value="${tp}"${t.type===tp?' selected':''}>${tp}</option>`).join('')}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Status</label><select id="f-status">${STATUSES.map(s=>`<option value="${s}"${t.status===s?' selected':''}>${STATUS_LABELS[s]}</option>`).join('')}</select></div>
+          <div class="field"><label>Priority</label><select id="f-priority">
+            <option value="low"${t.priority==='low'?' selected':''}>Low</option>
+            <option value="medium"${t.priority==='medium'?' selected':''}>Medium</option>
+            <option value="high"${t.priority==='high'?' selected':''}>High</option>
+          </select></div>
+        </div>
+        <div class="field"><label>Due date</label><input type="date" id="f-due" value="${escAttr(t.due||'')}"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn primary" id="save-btn" onclick="saveTask()">${editingId ? 'Save changes' : 'Add task'}</button>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('f-title').focus();
+}
+
+async function saveTask() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { document.getElementById('f-title').style.borderColor = 'var(--red)'; return; }
+  const saveBtn = document.getElementById('save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+  const task = {
+    title,
+    desc: document.getElementById('f-desc').value.trim(),
+    client: document.getElementById('f-client').value,
+    type: document.getElementById('f-type').value,
+    status: document.getElementById('f-status').value,
+    priority: document.getElementById('f-priority').value,
+    due: document.getElementById('f-due').value,
+  };
+  try {
+    if (editingId) {
+      await updateTask(editingId, { ...task, id: editingId });
+      showToast('Task updated');
+    } else {
+      await createTask(task);
+      showToast('Task added');
+    }
+    closeModal();
+    populateClientFilter();
+    render();
+  } catch(e) {
+    showToast('Failed to save task: ' + e.message, true);
+    setSyncStatus('error', 'Error');
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = editingId ? 'Save changes' : 'Add task'; }
+  }
+}
+
+function confirmDelete(id) {
+  if (!confirm('Delete this task? This cannot be undone.')) return;
+  doDelete(id);
+}
+
+async function doDelete(id) {
+  closeModal();
+  try {
+    await deleteTaskDb(id);
+    render();
+    showToast('Task deleted');
+  } catch(e) {
+    showToast('Failed to delete task', true);
+    setSyncStatus('error', 'Error');
+  }
+}
+
+function closeModal() { document.getElementById('modal-container').innerHTML = ''; }
+
+function populateClientFilter() {
+  const sel = document.getElementById('filterClient');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All clients</option>';
+  const allClients = [...new Set(tasks.map(t => t.client).filter(Boolean))].sort();
+  allClients.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    if (c === current) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'n' && !document.getElementById('modal-container').innerHTML &&
+      document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') openAdd();
+});
+
+['filterClient','filterStatus','filterType','search'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+loadTasks();
+
+// Auto-refresh every 30s so teammates' changes appear
+setInterval(() => {
+  if (!document.getElementById('modal-container').innerHTML) loadTasks();
+}, 30000);
+</script>
+</body>
+</html>
